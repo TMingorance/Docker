@@ -1,0 +1,21 @@
+services:
+  redis:
+    image: redis
+    volumes: 
+      - db_data2:/data
+    ports:
+      - "6379:6379"
+    restart: always
+    environment:
+      REDIS_HOST: redis
+
+    
+  dockerfacile:
+    image: dockerfacile/app
+    depends_on: 
+      - redis
+    environment:
+      starwars: 1
+      
+volumes:
+  db_data2:

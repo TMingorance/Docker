@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:latest
+    volumes: 
+      - db_data:/data
+    restart: always
+    ports: 
+      - "6379:6379"
+    environment:
+      REDIS_HOST: redis
+    
+  python:
+    build: .
+    depends_on:
+      - redis
+    restart: always
+    ports:
+      - "5000:5000"
+    
+volumes: 
+  db_data:
+    

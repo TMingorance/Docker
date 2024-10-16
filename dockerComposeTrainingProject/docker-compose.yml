@@ -1,0 +1,40 @@
+#version: specifies a version for this config file's syntax, but that was used in previous versions of docker compose. As of today, Oct 10 2024, it is line ignored by the docker compose plugin (version 2.29).
+#version 3.8 is the last version to be supported by docker-compose (v1.X) when it was a standalone python app and not a docker plugin. So some devs write 3.9 to make the file only compatible with docker compose v2
+version: '3.9'
+
+#service: a service contains one image and all the configuration around it: ports, volumes, env variables
+services:
+  #The next line is just the service name, given by the dev
+  db:
+    #image: self explanatory. Dev can use "build:" instead, to give the path to a dockerfile to build
+    image: mysql:5.7
+    #volumes: uses a volume to persist data from the folder path specified as argument. One volume can be used to persist multiple folders from multiple services. Volumes should be defined as seen below. An exact location on the host can also be specified as such: - /data/mysql:/var/lib/mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    #restart: specifies if the container should be restarted in case of fatal error
+    restart: always
+    #environment: specifies environment variables
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      
+  wordpress:
+    #depends_on: Docker will first start the services that don't depend on any other services, and will make sure that if a service a depends on other services b and c, then a is started only when b and c are ready.
+    depends_on:
+      - db
+    image: wordpress:latest
+    #ports: exposes a port on the host machine and forwards the requests to a port on the container. Works the same as docker run -p HOST_PORT:CONTAINER_PORT
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      
+#volumes: here, volumes defines the volumes for this entire compose config file. Putting nothing (as done below) uses the default behavior for managing volumes: creating it if it does not exist, and using the one created when it exists. There are many ways of defining volumes, like using external: true to use a volume created from elsewhere than during the running of docker compose up. See DockerDocs for more info
+volumes:
+  db_data: 
